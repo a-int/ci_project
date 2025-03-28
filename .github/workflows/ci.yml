@@ -1,27 +1,29 @@
-name: Run Tests
-
+name: CI
 on: [push, pull_request]
 
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.8, 3.9, 3.10]  # 🔹 Мультиверсии Python
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
+      - uses: actions/checkout@v3
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
-
+          python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
-          python -m venv venv
-          source venv/bin/activate
+          pip install flake8
           pip install -r requirements.txt
-
+      - name: Run flake8  # 🔹 Линтер
+        run: flake8 .
       - name: Run tests
+        run: python -m unittest discover
+      - name: Send Telegram message on failure  # 🔹 Уведомление в Telegram
+        if: failure()
         run: |
-          source venv/bin/activate
-          pytest
-
+          curl -s -X POST https://api.telegram.org/bot${{ secrets.TG_BOT_TOKEN }}/sendMessage \
+            -d chat_id=${{ secrets.TG_CHAT_ID }} \
+            -d text="❌ CI тесты не прошли в коммите $GITHUB_SHA"
