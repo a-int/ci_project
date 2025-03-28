@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.8, 3.9, 3.10]  # 🔹 Мультиверсии Python
+        python-version: [3.8, 3.9]  # 🔹 Мультиверсии Python
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python
